@@ -1,132 +1,104 @@
-import React from 'react';
-import Todo from './Todo';
+import React, { Component } from 'react';
+import './App.css';
+import TodoList from './Components/TodoList';
+import TodoItem from './Components/TodoItem';
 
-class App extends React.Component {
-    constructor (props) {
-        super (props);
-
-        this.state = {
-            todos: [
-                {id: 1, text: 'tip：click twice to edit', completed: false},
-                {id: 2, text: 'it is done', completed: true},
-                {id: 3, text: ':D', completed: false},
-            ],
-            newId: 4,
-            newText: '',
+class App extends Component {
+  
+    constructor(){
+        super();
+        
+        this.state={
+            value:"",
+            items:[]
+        }
+        
+        this.handleInput=(event)=>{
+            this.setState({
+                value:event.target.value
+            })
+        }
+        
+        this.handleAddItem=(event)=>{
+            event.preventDefault();
+            
+            if(this.state.value==="")
+                return; 
+            
+            const newItem={
+                task:this.state.value,
+                id: Date.now(),
+                status:false
+            }
+            
+            this.setState( (prevState)=>({
+                items:prevState.items.concat(newItem),
+                value: "",
+                
+            }))  
+        }
+        
+        this.handleMarkItemComplete=(itemId)=>{
+            
+            const updatedItems= this.state.items.map(item =>{
+                if(itemId === item.id)
+                    item.status = !item.status;
+                
+                return item;
+            })
+            
+            this.setState({
+                items:[].concat(updatedItems)
+            })       
+        }
+ 
+        this.handleDeleteItem=(itemId)=>{
+            
+            const updatedItems=this.state.items.filter(item=>{
+                return item.id!==itemId    
+            })
+            
+            this.setState({
+                items:[].concat(updatedItems)
+            })
         }
     }
     
-    // 取 todo 的內容
-    getNewValue (e) {
-        const newText = e.target.value;
+    render() {
         
-        this.setState({
-            newText: newText,
-        });
-    }
-    
-
-    // 新增
-    addTodo (e) {
-        const {todos, newText, newId} = this.state;
-        
-        if (!newText) {
-            e.preventDefault();
-            return;
+        const btn_style={
+            marginLeft:"10px",
+            marginBottom:"5px"
         }
         
-        this.setState({
-            todos: [
-                ...todos,
-                {id: newId, text: newText, completed: false}
-            ],
-            newId: newId +1,
-            newText: '',
-        });
-    }
-
-    // 刪除
-    deleteTodo (id) {
-        const {todos} = this.state;
+        const input_style={
+            width:"250px",
+            padding:"5px"
+        }  
         
-        let newTodos = todos.filter((item) => item.id !== id);
+    return (
+        <div className="container-fluid">
+        <div className="row">
         
-        this.setState({
-            todos: newTodos,
-        });        
-    }
-
-    // 完成
-    checkTodoToggle (id) {
-        const {todos} = this.state;
-
-        let newTodos = todos.map((item) => {
-            if(item.id === id){
-                item.completed = !item.completed;
-            }
-            return item;
-        });
+        <div className="col-md-4"></div> 
+        <div className="col-md-4">
+        <div className="body">
+        <h2 className="heading">TODO List</h2>   
+        <input style={input_style} placeHolder="Add New Todo" type="input" onChange={this.handleInput} value={this.state.value} />
+        <button style={btn_style} type="button" className="btn btn-primary btn-md" onClick={this.handleAddItem}>Add</button>
+        <TodoList items={this.state.items} deleteItem={this.handleDeleteItem} markItemComplete={this.handleMarkItemComplete} />
+        </div>
+        </div>
+        <div className="col-md-4"></div> 
         
-        this.setState({
-            todos: newTodos,
-        })
-    }
-
-
-    // 編輯
-    saveEditedValue(id, value) {
-        const {todos} = this.state;
-
-        let newTodos = todos.map((item) => {
-            if(item.id === id){
-                item.text = value;
-            }
-            return item;
-        });
-        
-        this.setState({
-            todos: newTodos,
-        })
-    }
-    
-
-
-    render () {
-        let {todos} = this.state;
-        
-        //console.log(todos)
-
-        return (
-            <div className="container">
-                <header className="header__container">
-                    <h1 className="header__site-title">Todo list</h1>
-                    <p className="header__site-description">馬上 記下 想要做的任何事</p>
-                </header>
-                <div className="input-group mb-3">
-                    <input type="text" className="form-control" id="input-add" placeholder="I'm gonna do..."
-                        value={this.state.newText}
-                        onChange={(e) => this.getNewValue(e)} />
-                    <div className="input-group-append">
-                        <button
-                            className="btn btn-outline-secondary"
-                            onClick={(e) => this.addTodo(e)}
-                        >add</button>
-                    </div>
-                </div>
-                <ul className="list-group list-group-flush">
-                    {todos.map((todo) =>
-                        <Todo
-                            key={todo.id}
-                            todo={todo}
-                            remove={(id) => this.deleteTodo(id)}
-                            checkToggle={(id) => this.checkTodoToggle(id)}
-                            saveEditedValue={(id, value) => this.saveEditedValue(id, value)}
-                        />
-                    )}
-                </ul>
-            </div>
-        );
-    }
+        </div>
+        </div>
+    );
+  }
 }
 
 export default App;
+
+
+
+
